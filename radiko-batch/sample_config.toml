@@ -12,7 +12,7 @@ station_id = "FMT"
 weekday = "sat"          # mon/tue/wed/thu/fri/sat/sun
 start_time = "00:00"     # HH:MM (JST、実際のカレンダー日付)
 duration_minutes = 30
-output_dir = "~/radiko/sukimore"        # 省略可（settings のデフォルトを使用）
+output_dir = "sukimore"                  # → ~/radiko/sukimore/ 配下に出力（省略時はベース直下）
 filename_template = "sukimore_{date}"   # 省略可
 
 [[programs]]
