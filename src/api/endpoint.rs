@@ -61,6 +61,20 @@ impl RadikoEndpoint {
         )
     }
 
+    /// タイムフリー再生用のプレイリストURLを生成
+    /// base_url: stream XMLから取得したプレイリストベースURL
+    /// ft: 開始日時 (YYYYMMDDHHmmss形式)
+    /// to: 終了日時 (YYYYMMDDHHmmss形式)
+    pub fn timefree_playlist_url(
+        _base_url: &str,
+        _station_id: &str,
+        _lsid: &str,
+        _ft: &str,
+        _to: &str,
+    ) -> String {
+        todo!("タイムフリープレイリストURL生成は未実装")
+    }
+
     pub fn area_free_playlist_create_url_endpoint(station_id: &str, lsid: &str) -> String {
         format!(
             "https://si-c-radiko.smartstream.ne.jp/so/playlist.m3u8?station_id={}&l=15&lsid={}&type=c",
@@ -153,6 +167,24 @@ mod tests {
             format!(
                 "https://si-f-radiko.smartstream.ne.jp/so/playlist.m3u8?station_id={}&l=15&lsid={}&type=b",
                 station_id, lsid
+            )
+        )
+    }
+
+    #[test]
+    fn timefree_playlist_url_test() {
+        let base_url = "https://tf-f-rpaa-radiko.smartstream.ne.jp/tf/playlist.m3u8";
+        let station_id = "FMT";
+        let lsid = crate::utils::generate_md5_hash();
+        let ft = "20260215000000";
+        let to = "20260215003000";
+        let timefree_url =
+            RadikoEndpoint::timefree_playlist_url(base_url, station_id, &lsid, ft, to);
+        assert_eq!(
+            timefree_url,
+            format!(
+                "{}?station_id={}&start_at={}&ft={}&end_at={}&to={}&l=300&lsid={}&type=b",
+                base_url, station_id, ft, ft, to, to, lsid
             )
         )
     }

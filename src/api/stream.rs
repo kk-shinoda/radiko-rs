@@ -108,6 +108,89 @@ mod tests {
         process::Command,
     };
 
+    /// タイムフリーURLから実際にオーディオセグメントをダウンロードし、
+    /// 有効なAACデータであることを検証する統合テスト。
+    ///
+    /// 環境変数 RADIKO_TEST_STATION_ID で放送局を指定可能（デフォルト: FMT）。
+    /// FMTのエリア外で実行する場合は受信可能な放送局IDを指定すること。
+    #[tokio::test]
+    async fn timefree_stream_url_should_return_downloadable_audio() -> Result<()> {
+        let radiko = Radiko::new().await;
+        let token = radiko.auth_token().await;
+        let station_id =
+            env::var("RADIKO_TEST_STATION_ID").unwrap_or_else(|_| "FMT".to_string());
+
+        // 2日前の00:00〜00:30を対象（タイムフリーは過去1週間まで有効）
+        let two_days_ago = chrono::Local::now() - chrono::Duration::days(2);
+        let base_date = two_days_ago.date_naive();
+        let ft = base_date
+            .and_hms_opt(0, 0, 0)
+            .unwrap()
+            .format("%Y%m%d%H%M%S")
+            .to_string();
+        let to = base_date
+            .and_hms_opt(0, 30, 0)
+            .unwrap()
+            .format("%Y%m%d%H%M%S")
+            .to_string();
+
+        // タイムフリーURL取得 → マスタープレイリスト → メディアプレイリスト → セグメント
+        let timefree_url = radiko
+            .timefree_stream_url(&station_id, &ft, &to)
+            .await?;
+
+        let client = reqwest::Client::new();
+        let master = client
+            .get(&timefree_url)
+            .header("X-Radiko-Authtoken", &token)
+            .send()
+            .await?
+            .text()
+            .await?;
+
+        let media_url = master
+            .lines()
+            .find(|l| l.starts_with("https://"))
+            .expect("マスタープレイリストにメディアURLが含まれていない");
+
+        let media = client
+            .get(media_url)
+            .header("X-Radiko-Authtoken", &token)
+            .send()
+            .await?
+            .text()
+            .await?;
+
+        let segment_url = media
+            .lines()
+            .find(|l| l.starts_with("https://"))
+            .expect("メディアプレイリストにセグメントURLが含まれていない");
+
+        let segment_bytes = client.get(segment_url).send().await?.bytes().await?;
+
+        // tempfileに保存して検証（スコープ抜けで自動削除）
+        let temp_file = tempfile::NamedTempFile::with_suffix(".aac")?;
+        std::fs::write(temp_file.path(), &segment_bytes)?;
+
+        let file_size = temp_file.path().metadata()?.len();
+        assert!(
+            file_size > 100,
+            "音声ファイルが小さすぎる: {} bytes",
+            file_size
+        );
+
+        // AACデータの検証: ID3タグ(0x49 0x44 0x33) または ADTSヘッダ(0xFF 0xF?)
+        assert!(
+            segment_bytes.starts_with(b"ID3")
+                || (segment_bytes[0] == 0xFF && segment_bytes[1] & 0xF0 == 0xF0),
+            "有効なAACオーディオデータではない (先頭2バイト: {:02X} {:02X})",
+            segment_bytes[0],
+            segment_bytes[1]
+        );
+
+        Ok(())
+    }
+
     #[tokio::test]
     async fn hls_m3u8_playground() -> Result<()> {
         let station_id = "TBS";
