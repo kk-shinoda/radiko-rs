@@ -6,11 +6,27 @@ use crate::schedule::Episode;
 /// エピソードの出力パスを解決する。
 /// settings.output_dir / [program.output_dir] / filename_template.format
 pub fn resolve_output_path(
-    _episode: &Episode,
-    _program: &ProgramConfig,
-    _settings: &Settings,
+    episode: &Episode,
+    program: &ProgramConfig,
+    settings: &Settings,
 ) -> PathBuf {
-    todo!()
+    let base = PathBuf::from(&settings.output_dir);
+    let dir = match &program.output_dir {
+        Some(sub) => base.join(sub),
+        None => base,
+    };
+
+    let template = program
+        .filename_template
+        .as_deref()
+        .unwrap_or(&settings.filename_template);
+    let filename = format!(
+        "{}.{}",
+        expand_template(template, episode, program),
+        settings.format
+    );
+
+    dir.join(filename)
 }
 
 /// 出力パスにファイルが既に存在するか判定する。
@@ -18,12 +34,26 @@ pub fn is_already_recorded(path: &PathBuf) -> bool {
     path.exists()
 }
 
-fn expand_template(
-    _template: &str,
-    _episode: &Episode,
-    _program: &ProgramConfig,
-) -> String {
-    todo!()
+fn expand_template(template: &str, episode: &Episode, program: &ProgramConfig) -> String {
+    let weekday_str = match program.weekday {
+        Weekday::Mon => "mon",
+        Weekday::Tue => "tue",
+        Weekday::Wed => "wed",
+        Weekday::Thu => "thu",
+        Weekday::Fri => "fri",
+        Weekday::Sat => "sat",
+        Weekday::Sun => "sun",
+    };
+
+    template
+        .replace("{name}", &program.name)
+        .replace("{date}", &episode.date.format("%Y%m%d").to_string())
+        .replace(
+            "{datetime}",
+            &episode.start.format("%Y%m%d%H%M%S").to_string(),
+        )
+        .replace("{station}", &program.station_id)
+        .replace("{weekday}", weekday_str)
 }
 
 #[cfg(test)]
