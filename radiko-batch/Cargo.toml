@@ -1,0 +1,16 @@
+[package]
+name = "radiko-batch"
+version = "0.1.0"
+edition = "2026"
+
+[dependencies]
+radiko-rs = { path = ".." }
+tokio = { version = "1", features = ["full"] }
+anyhow = "1"
+chrono = "0.4"
+chrono-tz = "0.10"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+reqwest = "0.12"
+shellexpand = "3"

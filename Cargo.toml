@@ -1,3 +1,6 @@
+[workspace]
+members = [".", "radiko-batch"]
+
 [package]
 name = "radiko-rs"
 version = "0.5.3"
