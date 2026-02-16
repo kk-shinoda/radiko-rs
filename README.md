@@ -87,7 +87,7 @@ filename_template = "{name}_{date}"
 format = "m4a"
 
 [[programs]]
-name = "好きもあ"
+name = "すきもあ"
 station_id = "FMT"
 weekday = "sat"
 start_time = "00:00"

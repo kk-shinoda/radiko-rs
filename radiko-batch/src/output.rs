@@ -103,11 +103,11 @@ mod tests {
     #[test]
     fn test_resolve_path_with_subdir() {
         let settings = make_settings("/tmp/radiko", "{name}_{date}", "m4a");
-        let program = make_program("好きもあ", "FMT", Weekday::Sat, Some("sukimore"), None);
+        let program = make_program("すきもあ", "FMT", Weekday::Sat, Some("sukimore"), None);
         let episode = make_episode("2026-02-14", "00:00", "00:30");
 
         let path = resolve_output_path(&episode, &program, &settings);
-        assert_eq!(path, PathBuf::from("/tmp/radiko/sukimore/好きもあ_20260214.m4a"));
+        assert_eq!(path, PathBuf::from("/tmp/radiko/sukimore/すきもあ_20260214.m4a"));
     }
 
     #[test]
@@ -127,7 +127,7 @@ mod tests {
     fn test_program_filename_template_overrides_settings() {
         let settings = make_settings("/tmp/radiko", "{name}_{date}", "m4a");
         let program = make_program(
-            "好きもあ",
+            "すきもあ",
             "FMT",
             Weekday::Sat,
             Some("sukimore"),

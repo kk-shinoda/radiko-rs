@@ -2,14 +2,14 @@
 # ~/.config/radiko-batch/config.toml にコピーして使用してください
 
 [settings]
-output_dir = "~/radiko"
+output_dir = ".archive"
 filename_template = "{name}_{date}"
 format = "m4a"
 
 [[programs]]
-name = "好きもあ"
+name = "すきもあ"
 station_id = "FMT"
-weekday = "sat"          # mon/tue/wed/thu/fri/sat/sun
+weekday = "sun"          # mon/tue/wed/thu/fri/sat/sun
 start_time = "00:00"     # HH:MM (JST、実際のカレンダー日付)
 duration_minutes = 30
 output_dir = "sukimore"                  # → ~/radiko/sukimore/ 配下に出力（省略時はベース直下）

@@ -46,7 +46,7 @@ radiko-batch --config <PATH> [--dry-run]
 | `{date}` | `20260214` | 放送日 (YYYYMMDD) |
 | `{datetime}` | `20260214000000` | 放送開始日時 (YYYYMMDDHHmmss) |
 | `{station}` | `FMT` | 放送局 ID |
-| `{name}` | `好きもあ` | 番組名 |
+| `{name}` | `すきもあ` | 番組名 |
 | `{weekday}` | `sat` | 放送曜日 |
 
 ## 出力パス解決
@@ -72,7 +72,7 @@ filename_template = "{name}_{date}"
 format = "m4a"
 
 [[programs]]
-name = "好きもあ"
+name = "すきもあ"
 station_id = "FMT"
 weekday = "sat"
 start_time = "00:00"
@@ -91,7 +91,7 @@ duration_minutes = 120
 
 | 番組 | 放送日 | 出力パス |
 |---|---|---|
-| 好きもあ | 2026-02-14 | `~/radiko/sukimore/sukimore_20260214.m4a` |
+| すきもあ | 2026-02-14 | `~/radiko/sukimore/sukimore_20260214.m4a` |
 | オールナイトニッポン | 2026-02-11 | `~/radiko/オールナイトニッポン_20260211.m4a` |
 
 ## 深夜番組の規約
@@ -120,7 +120,7 @@ weekday と start_time は**実際のカレンダー日付**を使う（radiko �
 
 | 番組 | weekday | 該当日 | 対象? |
 |---|---|---|---|
-| 好きもあ | sat | 2/14 (土) | Yes — 放送済み |
+| すきもあ | sat | 2/14 (土) | Yes — 放送済み |
 | オールナイトニッポン | wed | 2/11 (水) | Yes — 放送済み |
 
 ## 録音済み判定
@@ -139,7 +139,7 @@ weekday と start_time は**実際のカレンダー日付**を使う（radiko �
 ## 実行時の出力
 
 ```
-[SKIP] 好きもあ (20260214) - 録音済み: ~/radiko/sukimore/sukimore_20260214.m4a
+[SKIP] すきもあ (20260214) - 録音済み: ~/radiko/sukimore/sukimore_20260214.m4a
 [REC]  オールナイトニッポン (20260211) -> ~/radiko/オールナイトニッポン_20260211.m4a
 [DONE] オールナイトニッポン (20260211) ~/radiko/オールナイトニッポン_20260211.m4a
 ```
