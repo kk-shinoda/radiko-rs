@@ -67,6 +67,61 @@ cargo run --example record_timefree -- \
 | `--to` | 終了日時 (YYYYMMDDHHmmss) | 20260215003000 |
 | `-o` / `--output` | 出力ファイルパス | output.m4a |
 
+## radiko-batch: タイムフリー一括録音ツール
+
+設定ファイルに番組を登録しておき、コマンド1つでタイムフリー期間内かつ未録音のエピソードを自動録音する CLI ツールです（要 ffmpeg）。
+
+### セットアップ
+
+```bash
+# サンプル設定をコピーして編集
+cp radiko-batch/sample_config.toml ~/.config/radiko-batch/config.toml
+```
+
+### 設定例
+
+```toml
+[settings]
+output_dir = "~/radiko"        # ベース出力ディレクトリ（省略時: ./archive）
+filename_template = "{name}_{date}"
+format = "m4a"
+
+[[programs]]
+name = "好きもあ"
+station_id = "FMT"
+weekday = "sat"
+start_time = "00:00"
+duration_minutes = 30
+output_dir = "sukimore"        # → ~/radiko/sukimore/ 配下に出力
+filename_template = "sukimore_{date}"
+
+[[programs]]
+name = "オールナイトニッポン"
+station_id = "LFR"
+weekday = "wed"                # 火曜深夜25時 = 水曜01:00
+start_time = "01:00"
+duration_minutes = 120
+```
+
+### 実行
+
+```bash
+# ドライラン（録音対象の確認のみ）
+cargo run -p radiko-batch -- --config ~/.config/radiko-batch/config.toml --dry-run
+
+# 録音実行
+cargo run -p radiko-batch -- --config ~/.config/radiko-batch/config.toml
+```
+
+### cron で定期実行
+
+```bash
+# 毎日 12:00 に実行（タイムフリー窓は過去7日間）
+0 12 * * * cd /path/to/radiko-rs && cargo run -p radiko-batch -- --config ~/.config/radiko-batch/config.toml
+```
+
+詳細な仕様は [radiko-batch/spec.md](radiko-batch/spec.md) を参照してください。
+
 ## テスト
 
 ```bash
