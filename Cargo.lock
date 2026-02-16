@@ -1373,6 +1373,7 @@ dependencies = [
  "reqwest",
  "serde",
  "shellexpand",
+ "tempfile",
  "tokio",
  "toml",
 ]
