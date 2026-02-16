@@ -2,3 +2,6 @@
 *.aac
 .DS_Store
 .env
+
+.archive
+.config
