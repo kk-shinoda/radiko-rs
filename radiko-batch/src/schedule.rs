@@ -1,4 +1,4 @@
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime, TimeDelta};
 
 use crate::config::Weekday;
 
@@ -13,15 +13,49 @@ pub struct Episode {
     pub date: NaiveDate,
 }
 
+impl Weekday {
+    fn to_chrono(self) -> chrono::Weekday {
+        match self {
+            Weekday::Mon => chrono::Weekday::Mon,
+            Weekday::Tue => chrono::Weekday::Tue,
+            Weekday::Wed => chrono::Weekday::Wed,
+            Weekday::Thu => chrono::Weekday::Thu,
+            Weekday::Fri => chrono::Weekday::Fri,
+            Weekday::Sat => chrono::Weekday::Sat,
+            Weekday::Sun => chrono::Weekday::Sun,
+        }
+    }
+}
+
 /// 過去7日間（タイムフリー窓）を走査し、指定曜日に該当するエピソードを返す。
-/// now は JST の現在日時。
+/// now は JST の現在日時。放送終了済みのエピソードのみ返す。
 pub fn find_episodes_in_timefree_window(
-    _weekday: Weekday,
-    _start_time: NaiveTime,
-    _duration_minutes: u32,
-    _now: NaiveDateTime,
+    weekday: Weekday,
+    start_time: NaiveTime,
+    duration_minutes: u32,
+    now: NaiveDateTime,
 ) -> Vec<Episode> {
-    todo!()
+    let target_weekday = weekday.to_chrono();
+    let window_start = (now - TimeDelta::days(7)).date();
+    let today = now.date();
+
+    let mut episodes = Vec::new();
+    let mut date = window_start;
+
+    while date <= today {
+        if date.weekday() == target_weekday {
+            let start = date.and_time(start_time);
+            let end = start + TimeDelta::minutes(duration_minutes as i64);
+
+            // 放送が終了しているエピソードのみ
+            if end <= now {
+                episodes.push(Episode { start, end, date });
+            }
+        }
+        date += TimeDelta::days(1);
+    }
+
+    episodes
 }
 
 #[cfg(test)]
@@ -84,13 +118,15 @@ mod tests {
     #[test]
     fn test_midnight_crossing_program() {
         // 水曜01:00開始（火曜深夜25時）、120分
-        // 2026-02-18 (水) 12:00 に実行 → 2/18 (水) 01:00 が該当
+        // 2026-02-18 (水) 12:00 に実行 → 7日前=2/11(水)、水曜は 2/11 と 2/18
         let now = dt("2026-02-18 12:00");
         let episodes =
             find_episodes_in_timefree_window(Weekday::Wed, time("01:00"), 120, now);
-        assert_eq!(episodes.len(), 1);
-        assert_eq!(episodes[0].start, dt("2026-02-18 01:00"));
-        assert_eq!(episodes[0].end, dt("2026-02-18 03:00"));
+        assert_eq!(episodes.len(), 2);
+        assert_eq!(episodes[0].start, dt("2026-02-11 01:00"));
+        assert_eq!(episodes[0].end, dt("2026-02-11 03:00"));
+        assert_eq!(episodes[1].start, dt("2026-02-18 01:00"));
+        assert_eq!(episodes[1].end, dt("2026-02-18 03:00"));
     }
 
     #[test]
