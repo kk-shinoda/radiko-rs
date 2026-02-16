@@ -3,7 +3,7 @@
 
 [settings]
 output_dir = "~/radiko"
-filename_template = "{title}_{date}"
+filename_template = "{name}_{date}"
 format = "m4a"
 
 [[programs]]

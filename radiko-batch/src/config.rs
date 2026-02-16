@@ -36,7 +36,7 @@ fn default_output_dir() -> String {
 }
 
 fn default_filename_template() -> String {
-    "{title}_{date}".to_string()
+    "{name}_{date}".to_string()
 }
 
 fn default_format() -> String {
@@ -67,7 +67,7 @@ mod tests {
     const SAMPLE_TOML: &str = r#"
 [settings]
 output_dir = "~/radiko"
-filename_template = "{title}_{date}"
+filename_template = "{name}_{date}"
 format = "m4a"
 
 [[programs]]
@@ -91,7 +91,7 @@ duration_minutes = 120
     fn test_parse_config() {
         let config: Config = toml::from_str(SAMPLE_TOML).unwrap();
         assert_eq!(config.settings.output_dir, "~/radiko");
-        assert_eq!(config.settings.filename_template, "{title}_{date}");
+        assert_eq!(config.settings.filename_template, "{name}_{date}");
         assert_eq!(config.settings.format, "m4a");
         assert_eq!(config.programs.len(), 2);
     }
@@ -135,7 +135,7 @@ duration_minutes = 60
 "#;
         let config: Config = toml::from_str(minimal).unwrap();
         assert_eq!(config.settings.format, "m4a");
-        assert_eq!(config.settings.filename_template, "{title}_{date}");
+        assert_eq!(config.settings.filename_template, "{name}_{date}");
     }
 
     #[test]
