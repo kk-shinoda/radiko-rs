@@ -1,0 +1,27 @@
+# radiko-batch サンプル設定ファイル
+# ~/.config/radiko-batch/config.toml にコピーして使用してください
+
+[settings]
+output_dir = "~/radiko"
+filename_template = "{title}_{date}"
+format = "m4a"
+
+[[programs]]
+name = "好きもあ"
+station_id = "FMT"
+weekday = "sat"          # mon/tue/wed/thu/fri/sat/sun
+start_time = "00:00"     # HH:MM (JST、実際のカレンダー日付)
+duration_minutes = 30
+output_dir = "~/radiko/sukimore"        # 省略可（settings のデフォルトを使用）
+filename_template = "sukimore_{date}"   # 省略可
+
+[[programs]]
+name = "オールナイトニッポン"
+station_id = "LFR"
+weekday = "wed"          # 火曜深夜25時 = 水曜01:00
+start_time = "01:00"
+duration_minutes = 120
+
+# 深夜番組の規約:
+# 実際のカレンダー日付を使う（radikoの5時区切りではない）
+# 例: 「土曜25時」→ weekday = "sun", start_time = "01:00"

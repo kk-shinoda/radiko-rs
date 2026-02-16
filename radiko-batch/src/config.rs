@@ -23,11 +23,16 @@ pub struct Config {
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
+    #[serde(default = "default_output_dir")]
     pub output_dir: String,
     #[serde(default = "default_filename_template")]
     pub filename_template: String,
     #[serde(default = "default_format")]
     pub format: String,
+}
+
+fn default_output_dir() -> String {
+    "./archive".to_string()
 }
 
 fn default_filename_template() -> String {
@@ -49,8 +54,10 @@ pub struct ProgramConfig {
     pub filename_template: Option<String>,
 }
 
-pub fn load_config(_path: &Path) -> Result<Config> {
-    todo!()
+pub fn load_config(path: &Path) -> Result<Config> {
+    let content = std::fs::read_to_string(path)?;
+    let config: Config = toml::from_str(&content)?;
+    Ok(config)
 }
 
 #[cfg(test)]
@@ -69,7 +76,7 @@ station_id = "FMT"
 weekday = "sat"
 start_time = "00:00"
 duration_minutes = 30
-output_dir = "~/radiko/sukimoa"
+output_dir = "sukimoa"
 filename_template = "sukimoa_{date}"
 
 [[programs]]
@@ -99,10 +106,10 @@ duration_minutes = 120
     #[test]
     fn test_program_optional_fields() {
         let config: Config = toml::from_str(SAMPLE_TOML).unwrap();
-        // 1つ目はオプションフィールドあり
+        // 1つ目はオプションフィールドあり（ベースからの相対パス）
         assert_eq!(
             config.programs[0].output_dir.as_deref(),
-            Some("~/radiko/sukimoa")
+            Some("sukimoa")
         );
         assert_eq!(
             config.programs[0].filename_template.as_deref(),
@@ -129,6 +136,22 @@ duration_minutes = 60
         let config: Config = toml::from_str(minimal).unwrap();
         assert_eq!(config.settings.format, "m4a");
         assert_eq!(config.settings.filename_template, "{title}_{date}");
+    }
+
+    #[test]
+    fn test_default_output_dir() {
+        let minimal = r#"
+[settings]
+
+[[programs]]
+name = "Test"
+station_id = "TBS"
+weekday = "mon"
+start_time = "10:00"
+duration_minutes = 60
+"#;
+        let config: Config = toml::from_str(minimal).unwrap();
+        assert_eq!(config.settings.output_dir, "./archive");
     }
 
     #[test]
