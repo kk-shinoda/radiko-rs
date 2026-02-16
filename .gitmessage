@@ -1,0 +1,33 @@
+
+# Emoji Prefixes
+
+# 基本的な開発サイクル
+# ❤️  :heart:        テスト (Test: Red)
+# ✨  :sparkles:     機能実装 (Add feature: Green)
+# 💪  :muscle:       リファクタリング (Refactor)
+# 📚  :books:        ドキュメント (Document)
+
+# 仕様変更等による変更
+# 🚿  :shower:       機能削除 (Remove feature)
+# 💥  :boom:         破壊的変更 (Breaking changes)
+# 💩  :hankey:       うんコード (Bad code)
+# 📝  :memo:         コメント (Comment)
+#
+# 運用関連
+# 🎬  :clapper:      開発ツール (Development tools)
+# 🔧  :wrench:       CI/CD 関連 (Build related)
+# 🆙  :up:           依存関係 (Dependencies)
+
+# その他
+# 😇  :innocent:     凡ミス系修正 (Typo fix)
+# 🐛  :bug:          バグ修正 (Bug fix)
+# 👮  :cop:          セキュリティ修正 (Security fix)
+# 🚀  :rocket:       パフォーマンス修正 (Performance fix)
+
+#
+# 🚧  :construction: 途中 (Work In Progress)
+#
+# Install:
+#
+#   git config commit.template .gitmessage
+#
