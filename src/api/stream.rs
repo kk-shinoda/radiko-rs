@@ -5,6 +5,7 @@ use hls_m3u8::MasterPlaylist;
 use tempfile::NamedTempFile;
 
 use super::{auth::RadikoAuthManager, endpoint::RadikoEndpoint};
+use crate::dto::stream_xml::StreamUrlsXml;
 
 pub struct RadikoStream {
     inner: Arc<RadikoStreamRef>,
@@ -30,6 +31,37 @@ impl RadikoStream {
         } else {
             RadikoEndpoint::playlist_create_url_endpoint(station_id, &lsid)
         }
+    }
+
+    /// stream XMLからタイムフリー用のプレイリストベースURLを取得
+    async fn fetch_timefree_base_url(&self, station_id: &str) -> Result<String> {
+        let xml_url = RadikoEndpoint::stream_url_list_endpoint(station_id);
+        let xml_text = reqwest::get(&xml_url).await?.text().await?;
+        let stream_urls: StreamUrlsXml = quick_xml::de::from_str(&xml_text)?;
+
+        let area_free = if self.inner.auth_manager.area_free() {
+            "1"
+        } else {
+            "0"
+        };
+
+        stream_urls
+            .urls
+            .iter()
+            .find(|u| u.timefree == "1" && u.areafree == area_free)
+            .map(|u| u.playlist_create_url.clone())
+            .ok_or_else(|| anyhow!("timefree playlist URL not found in stream XML"))
+    }
+
+    /// タイムフリー再生用のストリームURLを生成
+    /// ft: 開始日時 (YYYYMMDDHHmmss形式)
+    /// to: 終了日時 (YYYYMMDDHHmmss形式)
+    pub async fn timefree_stream_url(&self, station_id: &str, ft: &str, to: &str) -> Result<String> {
+        let base_url = self.fetch_timefree_base_url(station_id).await?;
+        let lsid = &self.inner.auth_manager.lsid().to_string();
+        Ok(RadikoEndpoint::timefree_playlist_url(
+            &base_url, station_id, lsid, ft, to,
+        ))
     }
 
     #[allow(dead_code)]

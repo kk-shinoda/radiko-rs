@@ -104,11 +104,16 @@ impl Radiko {
     /// to: 終了日時 (YYYYMMDDHHmmss形式)
     pub async fn timefree_stream_url(
         &self,
-        _station_id: &str,
-        _ft: &str,
-        _to: &str,
+        station_id: &str,
+        ft: &str,
+        to: &str,
     ) -> Result<String> {
-        todo!("タイムフリーストリームURL取得は未実装")
+        self.inner
+            .read()
+            .await
+            .stream
+            .timefree_stream_url(station_id, ft, to)
+            .await
     }
 
     pub async fn stations_all(&self) -> Result<Vec<RegionStations>> {

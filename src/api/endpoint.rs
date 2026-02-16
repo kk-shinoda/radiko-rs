@@ -66,13 +66,16 @@ impl RadikoEndpoint {
     /// ft: 開始日時 (YYYYMMDDHHmmss形式)
     /// to: 終了日時 (YYYYMMDDHHmmss形式)
     pub fn timefree_playlist_url(
-        _base_url: &str,
-        _station_id: &str,
-        _lsid: &str,
-        _ft: &str,
-        _to: &str,
+        base_url: &str,
+        station_id: &str,
+        lsid: &str,
+        ft: &str,
+        to: &str,
     ) -> String {
-        todo!("タイムフリープレイリストURL生成は未実装")
+        format!(
+            "{}?station_id={}&start_at={}&ft={}&end_at={}&to={}&l=300&lsid={}&type=b",
+            base_url, station_id, ft, ft, to, to, lsid
+        )
     }
 
     pub fn area_free_playlist_create_url_endpoint(station_id: &str, lsid: &str) -> String {
