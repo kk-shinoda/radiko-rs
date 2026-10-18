@@ -107,10 +107,10 @@ duration_minutes = 120
 
 ```bash
 # ドライラン（録音対象の確認のみ）
-cargo run -p radiko-batch -- --config ~/.config/radiko-batch/config.toml --dry-run
+cargo run -p radiko-batch -- --config .config/radiko-batch/config.toml --dry-run
 
 # 録音実行
-cargo run -p radiko-batch -- --config ~/.config/radiko-batch/config.toml
+cargo run -p radiko-batch -- --config .config/radiko-batch/config.toml
 ```
 
 ### cron で定期実行
@@ -121,6 +121,35 @@ cargo run -p radiko-batch -- --config ~/.config/radiko-batch/config.toml
 ```
 
 詳細な仕様は [radiko-batch/spec.md](radiko-batch/spec.md) を参照してください。
+
+### サブコマンド（外部ツールからの呼び出し用）
+
+設定ファイルを使った一括録音のほかに、単発操作用のサブコマンドがある。いずれも進捗は stderr、結果は stdout への JSON 1行で出力する（`--json` 指定時）。
+
+```bash
+# 単発タイムフリー録音
+radiko-batch once --station-id LFR --ft 20261018204000 --to 20261018210000 --output ~/radiko/test.m4a
+# -> stdout: {"ok":true,"output":"...","duration_sec":1200}
+#    失敗時: {"ok":false,"error":"..."} かつ非ゼロ終了
+
+# 番組検索
+radiko-batch search --key "オールナイトニッポン" --past --json
+
+# 局の番組表（省略時は週間番組表、--date で当日分のみ絞り込み）
+radiko-batch programs --station-id LFR --json
+radiko-batch programs --station-id LFR --date 20261018 --json
+
+# 現在エリアで聴ける局一覧
+radiko-batch stations --json
+```
+
+#### ffmpeg のパス
+
+launchd 等、PATH に Homebrew (`/opt/homebrew/bin`) が含まれない環境から実行する場合は `RADIKO_FFMPEG` 環境変数で ffmpeg の絶対パスを指定する。未設定時は PATH 上の `ffmpeg` を使用する。
+
+```bash
+RADIKO_FFMPEG=/opt/homebrew/bin/ffmpeg radiko-batch once --station-id LFR --ft ... --to ... --output ...
+```
 
 ## テスト
 

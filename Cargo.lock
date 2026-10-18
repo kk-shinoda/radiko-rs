@@ -1372,6 +1372,7 @@ dependencies = [
  "radiko-rs",
  "reqwest",
  "serde",
+ "serde_json",
  "shellexpand",
  "tempfile",
  "tokio",

@@ -107,10 +107,7 @@ duration_minutes = 120
     fn test_program_optional_fields() {
         let config: Config = toml::from_str(SAMPLE_TOML).unwrap();
         // 1つ目はオプションフィールドあり（ベースからの相対パス）
-        assert_eq!(
-            config.programs[0].output_dir.as_deref(),
-            Some("sukimoa")
-        );
+        assert_eq!(config.programs[0].output_dir.as_deref(), Some("sukimoa"));
         assert_eq!(
             config.programs[0].filename_template.as_deref(),
             Some("sukimoa_{date}")

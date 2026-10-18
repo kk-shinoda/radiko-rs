@@ -8,6 +8,14 @@ use radiko_rs::radiko::Radiko;
 
 use crate::schedule::Episode;
 
+/// 使用する ffmpeg コマンド名/パスを決定する。
+/// `RADIKO_FFMPEG` 環境変数が設定されていればそれを使用し、
+/// 未設定なら PATH 上の `ffmpeg` を使用する
+/// （launchd 等、PATH に Homebrew が含まれない環境向け）。
+pub fn ffmpeg_command() -> String {
+    std::env::var("RADIKO_FFMPEG").unwrap_or_else(|_| "ffmpeg".to_string())
+}
+
 /// 一時ファイルに録音し、完了後に最終パスへリネームする。
 /// 途中失敗時は不完全ファイルが残らないようにする。
 pub async fn record_episode(
@@ -43,7 +51,7 @@ pub async fn record_episode(
         let chunk_url = radiko
             .timefree_stream_url(station_id, &chunk_ft, &chunk_to)
             .await?;
-        println!("  Fetching chunk: {} - {}", chunk_ft, chunk_to);
+        eprintln!("  Fetching chunk: {} - {}", chunk_ft, chunk_to);
 
         // マスタープレイリスト取得
         let master = client
@@ -107,7 +115,7 @@ pub async fn record_episode(
         current_ft = current_to;
     }
 
-    println!(
+    eprintln!(
         "  Total unique segments: {} (~{} seconds)",
         all_segments.len(),
         all_segments.len() * 5
@@ -127,7 +135,7 @@ pub async fn record_episode(
     std::fs::write(&m3u8_path, &full_medialist)?;
 
     // ffmpeg で変換
-    let status = Command::new("ffmpeg")
+    let ffmpeg_result = Command::new(ffmpeg_command())
         .args([
             "-loglevel",
             "warning",
@@ -145,10 +153,17 @@ pub async fn record_episode(
             "-y",
             &tmp_path.to_string_lossy(),
         ])
-        .status()?;
+        .status();
 
-    // m3u8 一時ファイルを削除
+    // m3u8 一時ファイルを削除（ffmpeg の起動自体に失敗した場合も含めて削除する）
     let _ = std::fs::remove_file(&m3u8_path);
+
+    let status = ffmpeg_result.with_context(|| {
+        format!(
+            "Failed to execute ffmpeg (RADIKO_FFMPEG={:?})",
+            ffmpeg_command()
+        )
+    })?;
 
     if !status.success() {
         let _ = std::fs::remove_file(&tmp_path);

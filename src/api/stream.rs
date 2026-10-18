@@ -56,7 +56,12 @@ impl RadikoStream {
     /// タイムフリー再生用のストリームURLを生成
     /// ft: 開始日時 (YYYYMMDDHHmmss形式)
     /// to: 終了日時 (YYYYMMDDHHmmss形式)
-    pub async fn timefree_stream_url(&self, station_id: &str, ft: &str, to: &str) -> Result<String> {
+    pub async fn timefree_stream_url(
+        &self,
+        station_id: &str,
+        ft: &str,
+        to: &str,
+    ) -> Result<String> {
         let base_url = self.fetch_timefree_base_url(station_id).await?;
         let lsid = &self.inner.auth_manager.lsid().to_string();
         Ok(RadikoEndpoint::timefree_playlist_url(
@@ -149,8 +154,7 @@ mod tests {
     async fn timefree_stream_url_should_return_downloadable_audio() -> Result<()> {
         let radiko = Radiko::new().await;
         let token = radiko.auth_token().await;
-        let station_id =
-            env::var("RADIKO_TEST_STATION_ID").unwrap_or_else(|_| "FMT".to_string());
+        let station_id = env::var("RADIKO_TEST_STATION_ID").unwrap_or_else(|_| "FMT".to_string());
 
         // 2日前の00:00〜00:30を対象（タイムフリーは過去1週間まで有効）
         let two_days_ago = chrono::Local::now() - chrono::Duration::days(2);
@@ -167,9 +171,7 @@ mod tests {
             .to_string();
 
         // タイムフリーURL取得 → マスタープレイリスト → メディアプレイリスト → セグメント
-        let timefree_url = radiko
-            .timefree_stream_url(&station_id, &ft, &to)
-            .await?;
+        let timefree_url = radiko.timefree_stream_url(&station_id, &ft, &to).await?;
 
         let client = reqwest::Client::new();
         let master = client

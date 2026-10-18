@@ -93,6 +93,8 @@ pub struct Program {
     pub info: String,
     pub description: String,
     pub img: String,
+    #[serde(default, rename = "program_url")]
+    pub program_url: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -157,6 +159,7 @@ impl From<ProgramXml> for Program {
             info: value.info.unwrap_or_default(),
             description: value.desc.unwrap_or_default(),
             img: value.img.unwrap_or_default(),
+            program_url: value.url.unwrap_or_default(),
         }
     }
 }

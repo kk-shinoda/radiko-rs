@@ -67,10 +67,7 @@ mod tests {
             date,
             NaiveTime::parse_from_str(start_time, "%H:%M").unwrap(),
         );
-        let end = NaiveDateTime::new(
-            date,
-            NaiveTime::parse_from_str(end_time, "%H:%M").unwrap(),
-        );
+        let end = NaiveDateTime::new(date, NaiveTime::parse_from_str(end_time, "%H:%M").unwrap());
         Episode { start, end, date }
     }
 
@@ -107,7 +104,10 @@ mod tests {
         let episode = make_episode("2026-02-14", "00:00", "00:30");
 
         let path = resolve_output_path(&episode, &program, &settings);
-        assert_eq!(path, PathBuf::from("/tmp/radiko/sukimore/すきもあ_20260214.m4a"));
+        assert_eq!(
+            path,
+            PathBuf::from("/tmp/radiko/sukimore/すきもあ_20260214.m4a")
+        );
     }
 
     #[test]

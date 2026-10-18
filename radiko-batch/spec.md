@@ -15,6 +15,85 @@ radiko-batch --config <PATH> [--dry-run]
 | `--config <PATH>` | Yes | TOML 設定ファイルのパス |
 | `--dry-run` | No | 録音せず、対象エピソードの一覧のみ表示 |
 
+サブコマンドを指定しない場合のみ有効（後方互換）。
+
+## サブコマンド
+
+外部ツール（benry 等）からの単発呼び出し用。いずれも進捗は stderr に出力し、`--json` 指定時は stdout に結果 JSON を出力する。
+
+### `once` — 単発タイムフリー録音
+
+```bash
+radiko-batch once --station-id <ID> --ft <YYYYMMDDHHMMSS> --to <YYYYMMDDHHMMSS> --output <FILE.m4a>
+```
+
+| オプション | 必須 | 説明 |
+|---|---|---|
+| `--station-id <ID>` | Yes | 放送局ID |
+| `--ft <YYYYMMDDHHMMSS>` | Yes | 開始日時 |
+| `--to <YYYYMMDDHHMMSS>` | Yes | 終了日時 |
+| `--output <FILE.m4a>` | Yes | 出力ファイルパス。親ディレクトリが無ければ作成する |
+
+録音パイプラインは一括録音モードと共通（5分チャンクでHLS収集→ffmpegでm4a変換→一時ファイルから最終名へリネーム。途中失敗時は不完全ファイルを残さない）。
+
+stdout への出力（1行）:
+
+- 成功: `{"ok":true,"output":"<path>","duration_sec":<整数>}`
+- 失敗: `{"ok":false,"error":"<message>"}`（この場合 exit code は非ゼロ）
+
+### `search` — 番組検索
+
+```bash
+radiko-batch search --key <KEYWORD> [--past|--future] --json
+```
+
+| オプション | 必須 | 説明 |
+|---|---|---|
+| `--key <KEYWORD>` | Yes | 検索キーワード |
+| `--past` | No | タイムフリー（過去）番組のみに絞る |
+| `--future` | No | 放送予定（未来）番組のみに絞る。`--past` と同時指定不可 |
+| `--json` | No | JSON 配列で出力する（省略時は簡易テキスト） |
+
+### `programs` — 局の番組表
+
+```bash
+radiko-batch programs --station-id <ID> [--date YYYYMMDD] --json
+```
+
+| オプション | 必須 | 説明 |
+|---|---|---|
+| `--station-id <ID>` | Yes | 放送局ID |
+| `--date <YYYYMMDD>` | No | 指定日のみに絞り込む（週間番組表を取得後にクライアント側で絞り込むため、週間表の範囲外を指定した場合は結果が空になる） |
+| `--json` | No | JSON 配列で出力する |
+
+### `stations` — 現在エリアの局一覧
+
+```bash
+radiko-batch stations --json
+```
+
+### 番組情報の JSON 形式（`search` / `programs` 共通）
+
+```json
+[
+  {
+    "station_id": "LFR",
+    "title": "オールナイトニッポン",
+    "ft": "20261018204000",
+    "to": "20261018210000",
+    "performer": "出演者名",
+    "info": "番組説明（info が空なら description を使う）",
+    "url": "https://example.com/program"
+  }
+]
+```
+
+`performer` / `info` / `url` はラジコ側のデータが空の場合キー自体を省略する。
+
+### ffmpeg のパス
+
+`RADIKO_FFMPEG` 環境変数で ffmpeg の実行パスを指定できる。未設定時は PATH 上の `ffmpeg` を使用する（launchd 等、PATH に Homebrew が含まれない環境向け）。
+
 ## 設定ファイル (TOML)
 
 ### `[settings]` — グローバル設定
